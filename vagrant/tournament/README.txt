@@ -1,3 +1,5 @@
+#Note to self: Do not change the ‘fullstack’ root folder name. Otherwise, when in vagrant it will not work.
+
 Steps to Run
 
 1. Open terminal.
