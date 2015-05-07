@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# 
+# !/usr/bin/env python
 # tournament.py -- implementation of a Swiss-system tournament
 #
 
@@ -13,65 +12,69 @@ def connect():
 
 def deleteMatches():
     """Remove all the match records from the database."""
+    pg = connect()
+    c = pg.cursor()
+    c.execute('delete from matches')
+    pg.commit()
+    pg.close()
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
+    pg = connect()
+    c = pg.cursor()
+    c.execute('delete from players')
+    pg.commit()
+    pg.close()
 
 
 def countPlayers():
     """Returns the number of players currently registered."""
+    pg = connect()
+    c = pg.cursor()
+    c.execute('select count(*) from players')
+    count = c.fetchall()
+    pg.close()
+    return count[0][0]
 
 
 def registerPlayer(name):
-    """Adds a player to the tournament database.
-  
-    The database assigns a unique serial id number for the player.  (This
-    should be handled by your SQL database schema, not in your Python code.)
-  
-    Args:
-      name: the player's full name (need not be unique).
-    """
+    """Adds a player to the tournament database."""
+    pg = connect()
+    c = pg.cursor()
+    c.execute("insert into players(name) values(%s)", (name,))
+    pg.commit()
+    pg.close()
 
 
 def playerStandings():
-    """Returns a list of the players and their win records, sorted by wins.
-
-    The first entry in the list should be the player in first place, or a player
-    tied for first place if there is currently a tie.
-
-    Returns:
-      A list of tuples, each of which contains (id, name, wins, matches):
-        id: the player's unique id (assigned by the database)
-        name: the player's full name (as registered)
-        wins: the number of matches the player has won
-        matches: the number of matches the player has played
-    """
+    """Returns a list of the players and their win records, sorted by wins."""
+    pg = connect()
+    c = pg.cursor()
+    c.execute("select id, name, wins, matches from players order by wins desc")
+    win_records_list = c.fetchall()
+    return win_records_list
 
 
 def reportMatch(winner, loser):
-    """Records the outcome of a single match between two players.
+    """Records the outcome of a single match between two players."""
+    pg = connect()
+    c = pg.cursor()
+    c.execute("insert into matches(winner_id, loser_id) VALUES(%s, %s)", (winner, loser,))
+    c.execute("update players set matches = matches+1 where id =%s", (loser,))
+    c.execute("update players set wins=wins+1, \matches = matches+1 where id =%s", (winner,))
+    pg.commit()
+    pg.close()
 
-    Args:
-      winner:  the id number of the player who won
-      loser:  the id number of the player who lost
-    """
- 
- 
+
 def swissPairings():
-    """Returns a list of pairs of players for the next round of a match.
-  
-    Assuming that there are an even number of players registered, each player
-    appears exactly once in the pairings.  Each player is paired with another
-    player with an equal or nearly-equal win record, that is, a player adjacent
-    to him or her in the standings.
-  
-    Returns:
-      A list of tuples, each of which contains (id1, name1, id2, name2)
-        id1: the first player's unique id
-        name1: the first player's name
-        id2: the second player's unique id
-        name2: the second player's name
-    """
+    """Returns a list of pairs of players for the next round of a match."""
+    current_standings = playerStandings()
 
+    pairs = []
 
+    for i in range(0, len(current_standings), 2):
+        opponent1 = current_standings[i]
+        opponent2 = current_standings[i+1]
+        pairs.append([opponent1[0], opponent1[1], opponent2[0], opponent2[1]])
+    return pairs
