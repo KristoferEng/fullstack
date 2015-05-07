@@ -6,19 +6,17 @@
 -- You can write comments in this file by starting them with two dashes, like
 -- these lines here.
 
-#Create database tournament in sql
-CREATE DATABASE TOURNAMENT;
+-- Create database tournament in sql
+CREATE DATABASE tournament;
 
-#Create table to record players' information in sql
-CREATE TABLE PLAYERS (
+-- Create table to record players' information in sql
+CREATE TABLE players (
   id serial primary key,
-  name text,
-  wins integer default 0,
-  matches integer default 0
+  name text
 );
 
-#Create table to record matches' information in sql
-CREATE TABLE MATCHES (
+-- Create table to record matches' information in sql
+CREATE TABLE matches (
   id serial primary key,
   winner_id integer references players(id),
   loser_id integer references players(id)
