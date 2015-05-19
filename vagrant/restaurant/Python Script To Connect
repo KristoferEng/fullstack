@@ -1,0 +1,331 @@
+>>> from sqlalchemy import create_engine
+>>> from sqlalchemy.orm import sessionmaker
+>>> from database_setup import Base, Restaurant, MenuItem
+>>> engine = create_engine('sqlite:///restaurantmenu.db')
+>>> Base.metadata.bind = engine
+>>> DBSession = sessionmaker(bind = engine)
+>>> session = DBSession()
+>>> myFirstRestaurant = Restaurant(name = "Pizza Palace")
+>>> session.add(myFirstRestaurant)
+>>> session.commit()
+>>> session.query(Restaurant).all()
+[<database_setup.Restaurant object at 0xb66f562c>, <database_setup.Restaurant object at 0xb66f56ac>, <database_setup.Restaurant object at 0xb66f566c>, <database_setup.Restaurant object at 0xb66f574c>, <database_setup.Restaurant object at 0xb66f57cc>, <database_setup.Restaurant object at 0xb66f584c>, <database_setup.Restaurant object at 0xb66f58cc>, <database_setup.Restaurant object at 0xb66f594c>, <database_setup.Restaurant object at 0xb66f59cc>, <database_setup.Restaurant object at 0xb66f5a4c>, <database_setup.Restaurant object at 0xb66d908c>]
+>>> session.query(MenuItem).all()
+[<database_setup.MenuItem object at 0xb65cd44c>, <database_setup.MenuItem object at 0xb65cd50c>, <database_setup.MenuItem object at 0xb65cd4ec>, <database_setup.MenuItem object at 0xb65cd54c>, <database_setup.MenuItem object at 0xb65cd5ac>, <database_setup.MenuItem object at 0xb65cd60c>, <database_setup.MenuItem object at 0xb65cd6ec>, <database_setup.MenuItem object at 0xb65cd76c>, <database_setup.MenuItem object at 0xb65cd7ec>, <database_setup.MenuItem object at 0xb65cd86c>, <database_setup.MenuItem object at 0xb65cd8ec>, <database_setup.MenuItem object at 0xb65cd96c>, <database_setup.MenuItem object at 0xb65cd9ec>, <database_setup.MenuItem object at 0xb65cda6c>, <database_setup.MenuItem object at 0xb65cdaec>, <database_setup.MenuItem object at 0xb65cdb6c>, <database_setup.MenuItem object at 0xb65cdbec>, <database_setup.MenuItem object at 0xb65cdc6c>, <database_setup.MenuItem object at 0xb65cdcec>, <database_setup.MenuItem object at 0xb65cdd6c>, <database_setup.MenuItem object at 0xb65cddec>, <database_setup.MenuItem object at 0xb65cde6c>, <database_setup.MenuItem object at 0xb65cdeec>, <database_setup.MenuItem object at 0xb65cdf6c>, <database_setup.MenuItem object at 0xb65cdfec>, <database_setup.MenuItem object at 0xb65d508c>, <database_setup.MenuItem object at 0xb65d510c>, <database_setup.MenuItem object at 0xb65d518c>, <database_setup.MenuItem object at 0xb65d520c>, <database_setup.MenuItem object at 0xb65d528c>, <database_setup.MenuItem object at 0xb65d530c>, <database_setup.MenuItem object at 0xb65d538c>, <database_setup.MenuItem object at 0xb65d540c>, <database_setup.MenuItem object at 0xb65d548c>, <database_setup.MenuItem object at 0xb65d550c>, <database_setup.MenuItem object at 0xb65d558c>, <database_setup.MenuItem object at 0xb65d560c>, <database_setup.MenuItem object at 0xb65d568c>, <database_setup.MenuItem object at 0xb65d570c>, <database_setup.MenuItem object at 0xb65d578c>, <database_setup.MenuItem object at 0xb65d580c>, <database_setup.MenuItem object at 0xb65d588c>, <database_setup.MenuItem object at 0xb65d590c>, <database_setup.MenuItem object at 0xb65d598c>, <database_setup.MenuItem object at 0xb65d5a0c>, <database_setup.MenuItem object at 0xb65d5a8c>, <database_setup.MenuItem object at 0xb65d5b0c>, <database_setup.MenuItem object at 0xb65d5b8c>, <database_setup.MenuItem object at 0xb65d5c0c>]
+>>> firstResult = session.query(Restaurant).first()
+>>> firstResult.name
+u'Pizza Palace'
+>>> items = session.query(Restaurant).all()
+>>> for item in items:
+...     print item.name
+...     print item.name
+...     print item.nameasd
+... ffas
+  File "<stdin>", line 5
+    ffas
+       ^
+SyntaxError: invalid syntax
+>>> for item in items:
+... print item.name
+  File "<stdin>", line 2
+    print item.name
+        ^
+IndentationError: expected an indented block
+>>> for items in items:
+...     print items.name
+... 
+Pizza Palace
+Urban Burger
+Super Stir Fry
+Panda Garden
+Thyme for That Vegetarian Cuisine 
+Tony's Bistro 
+Andala's
+Auntie Ann's Diner' 
+Cocina Y Amor 
+State Bird Provisions
+Pizza Palace
+>>> 
+>>> 
+>>> 
+>>> 
+>>> 
+>>> 
+>>> 
+>>> 
+>>> 
+>>> 
+>>> 
+>>> for item in items:
+...     print item.name
+... 
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: 'Restaurant' object is not iterable
+>>> items = session.query(Restaurant).all()
+>>> for item in items:
+...     print item.name
+... 
+Pizza Palace
+Urban Burger
+Super Stir Fry
+Panda Garden
+Thyme for That Vegetarian Cuisine 
+Tony's Bistro 
+Andala's
+Auntie Ann's Diner' 
+Cocina Y Amor 
+State Bird Provisions
+Pizza Palace
+>>> items = session.query(MenuItems).all()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'MenuItems' is not defined
+>>> items = session.query(MenuItem).all()
+>>> for item in items:
+...     print item.name
+... 
+Cheese Pizza
+Veggie Burger
+French Fries
+Chicken Burger
+Chocolate Cake
+Sirloin Burger
+Root Beer
+Iced Tea
+Grilled Cheese Sandwich
+Veggie Burger
+Chicken Stir Fry
+Peking Duck
+Spicy Tuna Roll
+Nepali Momo 
+Beef Noodle Soup
+Ramen
+Pho
+Chinese Dumplings
+Gyoza
+Stinky Tofu
+Veggie Burger
+Tres Leches Cake
+Mushroom risotto
+Honey Boba Shaved Snow
+Cauliflower Manchurian
+Aloo Gobi Burrito
+Veggie Burger
+Shellfish Tower
+Chicken and Rice
+Mom's Spaghetti
+Choc Full O' Mint (Smitten's Fresh Mint Chip ice cream)
+Tonkatsu Ramen
+Lamb Curry
+Chicken Marsala
+Potstickers
+Nigiri Sampler
+Veggie Burger
+Chicken Fried Steak
+Boysenberry Sorbet
+Broiled salmon
+Morels on toast (seasonal)
+Tandoori Chicken
+Veggie Burger
+Spinach Ice Cream
+Super Burrito Al Pastor
+Cachapa
+Chantrelle Toast
+Guanciale Chawanmushi
+Lemon Curd Ice Cream Sandwich
+>>> 
+>>> veggieBurgers = session.query(MenuItem).filter_by(name = 'Veggie Burger')
+>>> for veggieBurger in veggieBurgers:
+...     print veggieBurger.id
+...     print veggieBurger.price
+...     print veggieBurger.restaurant.name
+... 
+2
+$7.50
+Urban Burger
+10
+$5.99
+Urban Burger
+21
+$9.50
+Panda Garden
+27
+$6.80
+Thyme for That Vegetarian Cuisine 
+37
+$7.00
+Andala's
+43
+$9.50
+Auntie Ann's Diner' 
+>>> UrbaneVeggieBurger = session.query(MenuItem).filter_by(id = 8).one()
+>>> print UrbanVeggieBurger.price
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'UrbanVeggieBurger' is not defined
+>>> UrbanVeggieBurger = session.query(MenuItem).filter_by(id = 8).one()
+>>> print UrbanVeggieBurger.price
+$.99
+>>> UrbanVeggieBurger = session.query(MenuItem).filter_by(id = 10).one()
+>>> print UrbanVeggieBurger.price
+$5.99
+>>> UrbanVeggieBurger.price = '$2.99'
+>>> session.add(UrbanVeggieBurger)
+>>> session.commit()
+>>> veggieBurgers = session.query(MenuItem).filter_by(name = 'Veggie Burger')
+>>> for veggieBurger in veggieBurgers:
+...     print veggieBurger.id
+...     print veggieBurger.price
+...     print veggieBurger.restaurant.name
+...     print '\n'
+... 
+2
+$7.50
+Urban Burger
+
+
+10
+$2.99
+Urban Burger
+
+
+21
+$9.50
+Panda Garden
+
+
+27
+$6.80
+Thyme for That Vegetarian Cuisine 
+
+
+37
+$7.00
+Andala's
+
+
+43
+$9.50
+Auntie Ann's Diner' 
+
+
+>>> for veggieBurger in veggieBurgers:
+...     if veggieBurger.price != '$2.99':
+...             veggieBurger.price = '$2.99'
+...             session.add(veggieBurger)
+...             session.commit()
+... 
+>>> for veggieBurger in veggieBurgers:
+...     print veggieBurger.id
+...     print veggieBurger.price
+...     print veggieBurger.restaurant.name
+...     print '\n'
+... 
+2
+$2.99
+Urban Burger
+
+
+10
+$2.99
+Urban Burger
+
+
+21
+$2.99
+Panda Garden
+
+
+27
+$2.99
+Thyme for That Vegetarian Cuisine 
+
+
+37
+$2.99
+Andala's
+
+
+43
+$2.99
+Auntie Ann's Diner' 
+
+>>> spinach = session.query(MenuItem).filter_by(name = 'Spinach Ice Cream').one()
+>>> print spinach.restaurant.name
+Auntie Ann's Diner' 
+>>> session.delete(spinach)
+>>> session.commit()
+>>> spinach = session.query(MenuItem).filter_by(name = 'Spinach Ice Cream').one()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/usr/lib/python2.7/dist-packages/sqlalchemy/orm/query.py", line 2316, in one
+    raise orm_exc.NoResultFound("No row was found for one()")
+sqlalchemy.orm.exc.NoResultFound: No row was found for one()
+>>> 
+
+
+Notes:
+
+CRUD Review
+Operations with SQLAlchemy
+
+In this lesson, we performed all of our CRUD operations with SQLAlchemy on an SQLite database. Before we perform any operations, we must first import the necessary libraries, connect to our restaurantMenu.db, and create a session to interface with the database:
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from database_setup import Base, Restaurant, MenuItem
+
+engine = create_engine('sqlite:///restaurantMenu.db')
+Base.metadata.bind=engine
+DBSession = sessionmaker(bind = engine)
+session = DBSession()
+CREATE
+We created a new Restaurant and called it Pizza Palace:
+myFirstRestaurant = Restaurant(name = "Pizza Palace")
+session.add(myFirstRestaurant)
+sesssion.commit()
+We created a cheese pizza menu item and added it to the Pizza Palace Menu:
+cheesepizza = menuItem(name="Cheese Pizza", description = "Made with all natural ingredients and fresh mozzarella", course="Entree", price="$8.99", restaurant=myFirstRestaurant)
+session.add(cheesepizza)
+session.commit()
+READ
+We read out information in our database using the query method in SQLAlchemy:
+
+firstResult = sesson.query(Restaurant).first()
+firstResult.name
+
+items = session.query(MenuItem).all()
+for item in items:
+    print item.name
+UPDATE
+In order to update and existing entry in our database, we must execute the following commands:
+
+Find Entry
+Reset value(s)
+Add to session
+Execute session.commit()
+We found the veggie burger that belonged to the Urban Burger restaurant by executing the following query:
+veggieBurgers = session.query(MenuItem).filter_by(name= 'Veggie Burger')
+for veggieBurger in veggieBurgers:
+    print veggieBurger.id
+    print veggieBurger.price
+    print veggieBurger.restaurant.name
+    print "\n"
+Then we updated the price of the veggie burger to $2.99:
+
+UrbanVeggieBurger = session.query(MenuItem).filter_by(id=8).one()
+UrbanVeggieBurger.price = '$2.99'
+session.add(UrbanVeggieBurger)
+session.commit() 
+DELETE
+To delete an item from our database we must follow the following steps:
+
+Find the entry
+Session.delete(Entry)
+Session.commit()
+We deleted spinach Ice Cream from our Menu Items database with the following operations:
+
+spinach = session.query(MenuItem).filter_by(name = 'Spinach Ice Cream').one()
+session.delete(spinach)
+session.commit() 

@@ -1,0 +1,16 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+
+	<h2> Edit Category Name </h2>
+	<br>
+	<form action="{{ url_for('editCategory', category_id = category_id, category_name = category_name)}}" method="POST">
+
+	New Name:<input type ='text' size='30' name='name'>
+
+
+	<input type='submit' value='Rename'>
+
+	</form>
+
+{% endblock %}

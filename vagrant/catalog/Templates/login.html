@@ -1,0 +1,74 @@
+<html>
+
+<head>
+	<!-- Insert anonymous function into DOM -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+
+	<script src="//apis.google.com/js/platform.js?onload=start"> </script>
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<div class="row">	
+		<div class="col-md-3"></div>
+		<div class="col-md-6 text-center">
+			Sign in using google+:
+			<div id="signinButton">
+				<span class="g-signin"
+					data-scope="openid email"
+					data-clientid="813346898687-jp8fq0jq0dqob51os7hs9m3787vugg92.apps.googleusercontent.com"
+					data-redirecturi="postmessage"
+					data-accesstype="offline"
+					data-cookiepolicy="single_host_origin"
+					data-callback="signInCallback"
+					data-approvalprompt="force">
+				</span>
+			</div>
+			<div id="result"></div>
+		</div>
+		<div class="col-md-3"></div>
+	</div>
+
+	<script>
+	function signInCallback(authResult){
+		if (authResult['code']){
+			//Hide sign-in button since user is authorized
+			$('signinButton').attr('style', 'display:none');
+			//Send one-time-use code to server, if the server responds, write 'login successful' and redirects to original page.
+			$.ajax({
+      type: 'POST',
+      url: '/gconnect?state={{STATE}}',
+      processData: false, 
+      data: authResult['code'],
+      contentType: 'application/octet-stream; charset=utf-8', 
+      success: function(result) {
+        if (result) {
+          $('#result').html('Login Successful!</br>'+ result + '</br>Redirecting...')
+         setTimeout(function() {
+          window.location.href = "/catalog";
+         }, 4000);
+          
+
+      } else if (authResult['error']) {
+
+    console.log('There was an error: ' + authResult['error']);
+  } else {
+        $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+         }
+
+      }
+      
+  }); } }
+	</script>
+
+</body>
+
+</html>

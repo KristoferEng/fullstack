@@ -1,0 +1,16 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+
+	<h2> Delete Category </h2>
+	<br>
+	<form action="{{ url_for('deleteCategory', category_id = category_id, category_name = category_name)}}" method = 'POST'>
+
+	Are you sure that you want to delete the category and all of the category's items?
+	<br>
+	<br>
+	<input type='submit' value='Delete'> <a href = "{{url_for('catalogHome')}}"> Cancel</a>
+
+	</form>
+
+{% endblock %}

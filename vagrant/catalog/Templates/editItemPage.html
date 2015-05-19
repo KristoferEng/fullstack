@@ -1,0 +1,32 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+
+	<h2> Edit Item Name </h2>
+	<form action="{{ url_for('editItem', category_id = category_id, category_name = category_name, item_id = item_id)}}" method="POST">
+
+	Name:<input type ='text' size='30' name='name' value= '{{item.name}}'>
+	<br>
+	<br>
+	Description:<input type ='text' size='90' name='description' value = '{{item.description}}'>
+	<br>
+	<br>
+	Category:
+	<select name='category_id'>
+		{% for c in categories %}
+		{% if item.category_id == c.id %}
+	  <option value='{{c.id}}' selected>{{c.name}}</option>
+
+	  {% else %}
+	  <option value='{{c.id}}'>{{c.name}}</option>
+	  {% endif %}
+
+	  {% endfor %}
+	</select>
+	<br>
+	<br>
+	<input type='submit' value='Edit Item'>
+
+	</form>
+
+{% endblock %}

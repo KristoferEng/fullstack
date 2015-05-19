@@ -1,0 +1,50 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-6">
+		<div class='flash'>
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					<ul>
+		        {% for message in messages %}
+		            <li> <strong> {{ message }} </strong> </li>
+		        {% endfor %}
+		      </ul>
+		        {% endif %}
+		    {% endwith %}
+		</div>
+		<h2>Categories</h2>
+			{% if not categories %}
+				<p>No categories.</p>
+			{% endif %}
+			{% for c in categories %}
+				<a href='{{url_for('showCategoryItems', category_id = c.id, category_name = c.name)}}'>{{c.name}}</a>
+				<br>
+			{% endfor %}
+	</div>
+	<div class="col-md-3"></div>
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-6">
+		<h2>{{category_name}} Items ({{items|length}} items)</h2>
+		{% for i in items %}
+			<a href='{{url_for('showItem', category_id = category_id, category_name = category_name, item_id = i.id, item_name = i.name)}}'>{{i.name}} ({{i.category.name}})</a>
+			<br>
+		{% endfor %}
+		<br>
+		<br>
+		<br>
+		<a href='{{url_for('newItem', category_id = category_id, category_name = category_name)}}'>Add New Item</a>
+		<br>
+		<a href='{{url_for('deleteCategory', category_id = category_id, category_name = category_name)}}'>Delete Category</a>
+		<br>
+		<a href='{{url_for('editCategory', category_id = category_id, category_name = category_name)}}'>Edit Category</a>	
+	</div>
+	<div class="col-md-3"></div>
+</div>
+{% endblock %}
