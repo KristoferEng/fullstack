@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, jsonify, url_for
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, Item, User
+from db_helper import getUserID, createUser, getUserInfo
 from flask import session as login_session_2
 import random
 import string
@@ -14,11 +15,25 @@ import httplib2
 import json
 import requests
 
-# Initializes the database to work with and binds it to Base
+# Import for Login Required Decorator
+from functools import wraps
+from flask import g
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in login_session_2:
+            flash("You are not signed in. Sign in to access")
+            return redirect(url_for('showLogin'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Initialize the database to work with and bind it to Base
 engine = create_engine('sqlite:///catalog.db')
 Base.metadata.bind = engine
 
-# Creates a new session to access and update the database
+# Create a new session to access and update the database
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
@@ -29,15 +44,15 @@ CLIENT_ID = json.loads(open('client_secrets.json',
                             'r').read())['web']['client_id']
 
 
-# Home page for Item Catalog
 @app.route('/')
 @app.route('/catalog')
 def catalogHome():
-    # Shows all categories and only 10 items
+    """Shows home page with all categories and 10 latest items."""
+
     categories = session.query(Category).all()
     items = session.query(Item).order_by(Item.id.desc()).limit(10).all()
 
-    # Checks if logged in to display updating database options
+    # Check if user logged in to display public or restricted home page
     if 'username' not in login_session_2:
         return render_template('publicHome2.html',
                                categories=categories, items=items)
@@ -48,7 +63,8 @@ def catalogHome():
 
 @app.route('/login')
 def showLogin():
-    # Creates antiforgery session token and sets it to state
+    """Creates antiforgery session token and sets it to state."""
+
     state = ''.join(random.choice(string.ascii_uppercase +
                     string.digits) for x in xrange(32))
     login_session_2['state'] = state
@@ -57,16 +73,19 @@ def showLogin():
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """Connects to Google + using hybrid authentication flow."""
+
     # Validate state token
     if request.args.get('state') != login_session_2['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
+
     # Obtain authorization code
     code = request.data
 
+    # Upgrade the authorization code into a credentials object
     try:
-        # Upgrade the authorization code into a credentials object
         oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
@@ -153,33 +172,10 @@ def gconnect():
     return output
 
 
-# Get user ID helper method
-def getUserID(email):
-    try:
-        user = session.query(User).filter_by(email=email).one()
-        return user.id
-    except:
-        return None
-
-
-# Create user helper method
-def createUser(login_session_2):
-    newUser = User(name=login_session_2['username'], email=login_session_2[
-                   'email'], picture=login_session_2['picture'])
-    session.add(newUser)
-    session.commit()
-    user = session.query(User).filter_by(email=login_session_2['email']).one()
-    return user.id
-
-
-# Get user info helper method
-def getUserInfo(user_id):
-    user = session.query(User).filter_by(id=user_id).one()
-    return user
-
-
 @app.route('/gdisconnect')
 def gdisconnect():
+    """Disconnects and logs out current Google + user."""
+
     # Only disconnect a connected user.
     credentials = login_session_2.get('credentials')
 
@@ -206,6 +202,8 @@ def gdisconnect():
 
 @app.route('/disconnect')
 def disconnect():
+    """Disconnect method."""
+
     # Delete session if logged in
     if 'provider' in login_session_2:
         if login_session_2['provider'] == 'google':
@@ -225,11 +223,9 @@ def disconnect():
 
 
 @app.route('/catalog/new', methods=["GET", "POST"])
+@login_required
 def newCategory():
-    # Check if logged in
-    if 'username' not in login_session_2:
-        flash("You need to be logged in to access that website.")
-        return redirect(url_for('catalogHome'))
+    """Creates a new category in the database."""
 
     # Check if POST method and add new category
     if request.method == 'POST':
@@ -245,6 +241,8 @@ def newCategory():
 
 @app.route('/catalog/<int:category_id>/<category_name>/items')
 def showCategoryItems(category_id, category_name):
+    """Shows a category's items in the database."""
+
     categories = session.query(Category).all()
     items = session.query(Item).filter_by(category_id=category_id).all()
 
@@ -263,13 +261,11 @@ def showCategoryItems(category_id, category_name):
 
 @app.route('/catalog/<int:category_id>/<category_name>/edit',
            methods=["GET", "POST"])
+@login_required
 def editCategory(category_id, category_name):
-    categoryToEdit = session.query(Category).filter_by(id=category_id).one()
+    """Edits a category in the database."""
 
-    # Check if logged in
-    if 'username' not in login_session_2:
-        flash("You need to be logged in to access that website.")
-        return redirect(url_for('catalogHome'))
+    categoryToEdit = session.query(Category).filter_by(id=category_id).one()
 
     # Check if user is user that created category
     if categoryToEdit.user_id != login_session_2['user_id']:
@@ -292,13 +288,11 @@ def editCategory(category_id, category_name):
 
 @app.route('/catalog/<int:category_id>/<category_name>/delete',
            methods=["GET", "POST"])
+@login_required
 def deleteCategory(category_id, category_name):
-    categoryToDelete = session.query(Category).filter_by(id=category_id).one()
+    """Deletes a category and all its items in the database."""
 
-    # Check if logged in
-    if 'username' not in login_session_2:
-        flash("You need to be logged in to access that website.")
-        return redirect(url_for('catalogHome'))
+    categoryToDelete = session.query(Category).filter_by(id=category_id).one()
 
     # Check if user is user that created category
     if categoryToDelete.user_id != login_session_2['user_id']:
@@ -324,13 +318,11 @@ def deleteCategory(category_id, category_name):
 
 @app.route('/catalog/<int:category_id>/<category_name>/new',
            methods=["GET", "POST"])
+@login_required
 def newItem(category_id, category_name):
-    categoryForItem = session.query(Category).filter_by(id=category_id).one()
+    """Creates a new items in the database."""
 
-    # Check if logged in
-    if 'username' not in login_session_2:
-        flash("You need to be logged in to access that website.")
-        return redirect(url_for('catalogHome'))
+    categoryForItem = session.query(Category).filter_by(id=category_id).one()
 
     # Check if user is user that created category
     if categoryForItem.user_id != login_session_2['user_id']:
@@ -358,6 +350,8 @@ def newItem(category_id, category_name):
 @app.route(
     '/catalog/<int:category_id>/<category_name>/<int:item_id>/<item_name>')
 def showItem(category_id, category_name, item_id, item_name):
+    """Shows an items in the database."""
+
     item = session.query(Item).filter_by(id=item_id).one()
 
     # Check if logged in
@@ -374,13 +368,11 @@ def showItem(category_id, category_name, item_id, item_name):
 
 @app.route('/catalog/<int:category_id>/<category_name>/<int:item_id>/edit',
            methods=["GET", "POST"])
+@login_required
 def editItem(category_id, category_name, item_id):
-    categoryForItem = session.query(Category).filter_by(id=category_id).one()
+    """Edits an item in the database."""
 
-    # Check if logged in
-    if 'username' not in login_session_2:
-        flash("You need to be logged in to access that website.")
-        return redirect(url_for('catalogHome'))
+    categoryForItem = session.query(Category).filter_by(id=category_id).one()
 
     # Check if user is user that created category
     if categoryForItem.user_id != login_session_2['user_id']:
@@ -411,13 +403,11 @@ def editItem(category_id, category_name, item_id):
 
 @app.route('/catalog/<int:category_id>/<category_name>/<int:item_id>/delete',
            methods=["GET", "POST"])
+@login_required
 def deleteItem(category_id, category_name, item_id):
-    categoryForItem = session.query(Category).filter_by(id=category_id).one()
+    """Deletes an item in the database."""
 
-    # Check if logged in
-    if 'username' not in login_session_2:
-        flash("You need to be logged in to access that website.")
-        return redirect(url_for('catalogHome'))
+    categoryForItem = session.query(Category).filter_by(id=category_id).one()
 
     # Check if user is user that created category
     if categoryForItem.user_id != login_session_2['user_id']:
@@ -438,28 +428,33 @@ def deleteItem(category_id, category_name, item_id):
                                category_name=category_name, item_id=item_id)
 
 
-# JSON for categories
 @app.route('/catalog/json')
 def catalogJSON():
+    """Provides JSON for all categories in the database."""
+
     categories = session.query(Category).all()
     return jsonify(categories=[c.serialize for c in categories])
 
 
-# JSON for items in categories
 @app.route('/catalog/<int:category_id>/<category_name>/json')
 def categoryJSON(category_id, category_name):
+    """Provides JSON for all items in a category in the database."""
+
     items = session.query(Item).filter_by(category_id=category_id).all()
     return jsonify(items_in_category=[i.serialize for i in items])
 
 
-# JSON for one item
 @app.route('/catalog/<int:category_id>/<category_name>/<int:item_id>/\
            <item_name>/json')
 def itemJSON(category_id, category_name, item_id, item_name):
+    """Provides JSON for an item in a category in the database."""
+
     item = session.query(Item).filter_by(id=item_id).one()
     return jsonify(item=[item.serialize])
 
 if __name__ == '__main__':
+    """Checks if it is called and sets the port."""
+
     app.secret_key = 'super_secret_key'
     app.debug = True
     app.run(host='0.0.0.0', port=8080)

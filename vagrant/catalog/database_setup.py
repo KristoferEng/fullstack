@@ -9,9 +9,10 @@ Base = declarative_base()
 
 
 class User(Base):
+    """Declares necessary User columns and table name."""
+
     __tablename__ = 'user'
 
-    # Declare necessary User columns
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
     email = Column(String(250), nullable=False)
@@ -19,6 +20,8 @@ class User(Base):
 
 
 class Category(Base):
+    """Declares necessary Category columns and table name."""
+
     __tablename__ = 'category'
 
     # Declare necessary Category columns
@@ -29,7 +32,8 @@ class Category(Base):
 
     @property
     def serialize(self):
-        # Return object data in easily serializeable format
+        """Returns object data in easily serializable format."""
+
         return {
             'name': self.name,
             'id': self.id
@@ -37,9 +41,10 @@ class Category(Base):
 
 
 class Item(Base):
+    """Declares necessary Item columns and table name."""
+
     __tablename__ = 'item'
 
-    # Declare necessary Item columns
     name = Column(String(80), nullable=False)
     id = Column(Integer, primary_key=True)
     description = Column(String(250))
@@ -50,7 +55,8 @@ class Item(Base):
 
     @property
     def serialize(self):
-        # Return object data in easily serializeable format
+        """Returns object data in easily serializable format."""
+
         return {
             'name': self.name,
             'description': self.description,
